@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 190" role="img" aria-labelledby="title desc">
+  <title id="title">ScriptStation logo</title>
+  <desc id="desc">ScriptStation wordmark with terminal icon and Intelligent Automation tagline.</desc>
+  <rect width="760" height="190" fill="#ffffff"/>
+  <rect x="24" y="28" width="130" height="130" rx="26" fill="#172d3a"/>
+  <path d="M58 72 L88 98 L58 124" fill="none" stroke="#b8d9a9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M99 118 H130" fill="none" stroke="#dde77d" stroke-width="10" stroke-linecap="round"/>
+  <text x="205" y="105" fill="#172d3a" font-family="Inter, Arial, Helvetica, sans-serif" font-size="54" font-weight="800">ScriptStation</text>
+  <text x="207" y="142" fill="#61717d" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="500" letter-spacing="10">INTELLIGENT AUTOMATION</text>
+</svg>

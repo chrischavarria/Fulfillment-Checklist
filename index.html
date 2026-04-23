@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fulfillment Daily Checklist</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2933;
+      --muted: #667085;
+      --line: #d7dde5;
+      --panel: #ffffff;
+      --bg: #f4f7f9;
+      --accent: #136f63;
+      --accent-2: #235789;
+      --danger: #b42318;
+      --warn: #b54708;
+      --done: #067647;
+      --shadow: 0 10px 30px rgba(31, 41, 51, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    header {
+      background: #12343b;
+      color: #fff;
+      padding: 22px 28px;
+    }
+
+    .header-inner {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .brand-lockup {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      display: block;
+      width: clamp(210px, 34vw, 360px);
+      height: auto;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+    }
+
+    .brand-title {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .clock {
+      min-width: 275px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      text-align: right;
+    }
+
+    .clock strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .clock span {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 13px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 18px;
+      max-width: 1180px;
+      margin: 20px auto;
+      padding: 0 18px 28px;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel,
+    .sidebar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-title,
+    .sidebar-title {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 20px;
+    }
+
+    h3 {
+      font-size: 16px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      padding: 18px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #c9d2dc;
+      border-radius: 7px;
+      color: var(--ink);
+      background: #fff;
+      padding: 9px 11px;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 0;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .tab-button {
+      color: var(--accent-2);
+      border-color: #b7c8dc;
+      background: #f7fbff;
+    }
+
+    .tab-button.active {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) 110px;
+      gap: 12px;
+      align-items: start;
+      padding: 13px 18px;
+      border-top: 1px solid #eef1f4;
+    }
+
+    .task input[type="checkbox"] {
+      width: 22px;
+      min-height: 22px;
+      margin: 2px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .task-title {
+      color: var(--ink);
+      font-weight: 750;
+      line-height: 1.35;
+    }
+
+    .task-detail {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .status-pill {
+      justify-self: end;
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid #cad5df;
+      padding: 5px 9px;
+      color: var(--muted);
+      background: #f8fafc;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .task.done .status-pill {
+      color: #fff;
+      border-color: var(--done);
+      background: var(--done);
+    }
+
+    .task.done .task-title {
+      color: var(--done);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .primary {
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .secondary {
+      color: var(--accent-2);
+      border-color: #b7c8dc;
+      background: #f7fbff;
+    }
+
+    .ghost {
+      color: var(--ink);
+      border-color: #cfd7e1;
+      background: #fff;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .sidebar {
+      align-self: start;
+      overflow: hidden;
+    }
+
+    .side-section {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e6ebf0;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.2s ease;
+    }
+
+    .progress-text,
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .notice {
+      border-left: 4px solid var(--warn);
+      background: #fff7ed;
+      padding: 10px 12px;
+      color: #7c2d12;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .success {
+      border-left-color: var(--done);
+      background: #ecfdf3;
+      color: #085d3a;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .history-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 9px;
+      background: #fbfcfd;
+      font-size: 13px;
+    }
+
+    .history-item strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      .header-inner,
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner {
+        align-items: stretch;
+      }
+
+      .brand-lockup {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand-logo {
+        width: min(100%, 330px);
+      }
+
+      .clock {
+        min-width: 0;
+        text-align: left;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        grid-template-columns: 1fr;
+      }
+
+      .task {
+        grid-template-columns: 28px minmax(0, 1fr);
+      }
+
+      .status-pill {
+        grid-column: 2;
+        justify-self: start;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand-lockup">
+        <img class="brand-logo" src="assets/scriptstation-logo.svg" alt="ScriptStation Intelligent Automation">
+        <div class="brand-title">
+        <h1>Fulfillment Daily Checklist</h1>
+        </div>
+      </div>
+      <div class="clock" aria-live="polite">
+        <strong id="clockDate">Loading date</strong>
+        <span id="clockTime">Loading time</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="workspace" aria-label="Checklist workspace">
+      <form id="checklistForm">
+        <div class="tabs" role="tablist" aria-label="Checklist type">
+          <button class="tab-button active" id="morningTab" type="button" role="tab" aria-selected="true" data-checklist="morning">Morning Checklist</button>
+          <button class="tab-button" id="cleaningTab" type="button" role="tab" aria-selected="false" data-checklist="cleaning">Daily Cleaning</button>
+        </div>
+
+        <section class="panel" aria-labelledby="teamInfoTitle">
+          <div class="panel-title">
+            <h2 id="teamInfoTitle">Shift Details</h2>
+          </div>
+          <div class="meta-grid">
+            <label>
+              Team member
+              <input id="teamMember" name="teamMember" autocomplete="name" required>
+            </label>
+            <label>
+              Station
+              <input id="station" name="station" value="Fulfillment" readonly required>
+            </label>
+            <label>
+              Shift
+              <select id="shift" name="shift" required>
+                <option>Morning</option>
+                <option>Midday</option>
+                <option>Closing</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="morningTitle" data-checklist-section="morning">
+          <div class="panel-title">
+            <h2 id="morningTitle">Morning Product Checklist</h2>
+            <span class="small" id="morningCount">0 complete</span>
+          </div>
+          <div class="checklist" id="morningTasks"></div>
+        </section>
+
+        <section class="panel hidden" aria-labelledby="cleaningTitle" data-checklist-section="cleaning">
+          <div class="panel-title">
+            <h2 id="cleaningTitle">End-of-Day Cleaning</h2>
+            <span class="small" id="cleaningCount">0 complete</span>
+          </div>
+          <div class="checklist" id="cleaningTasks"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="notesTitle">
+          <div class="panel-title">
+            <h2 id="notesTitle">Notes</h2>
+          </div>
+          <div class="meta-grid" style="grid-template-columns: 1fr;">
+            <label>
+              Issues, missing supplies, or handoff notes
+              <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+            </label>
+          </div>
+          <div class="actions">
+            <button class="primary" id="submitButton" type="submit">Submit Morning Checklist</button>
+            <button class="secondary" id="saveDraftButton" type="button">Save Draft</button>
+            <button class="ghost" id="resetButton" type="button">Reset</button>
+          </div>
+        </section>
+      </form>
+    </section>
+
+    <aside class="sidebar" aria-label="Checklist status and settings">
+      <div class="sidebar-title">
+        <h3>Today</h3>
+      </div>
+      <div class="side-section">
+        <div class="progress-wrap">
+          <div class="progress-bar" aria-hidden="true">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-text" id="progressText">0 of 0 tasks complete</div>
+        </div>
+        <div class="notice hidden" id="readyNotice"></div>
+      </div>
+
+      <div class="side-section">
+        <h3>Slack Delivery</h3>
+        <label>
+          Slack relay URL
+          <input id="relayUrl" placeholder="Paste Google Apps Script web app URL">
+        </label>
+        <label>
+          Location label
+          <input id="locationLabel" placeholder="Warehouse, office, or computer name">
+        </label>
+        <button class="secondary" id="saveSettingsButton" type="button">Save Settings</button>
+        <div class="small">Settings are saved on this computer only. Use the same relay URL on each department computer.</div>
+      </div>
+
+      <div class="side-section">
+        <h3>Submission History</h3>
+        <div class="history-list" id="historyList"></div>
+        <button class="ghost" id="exportButton" type="button">Export CSV</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const morningTasks = [
+      ["Product report generated", "Generate the daily product report before fulfillment begins.", "Morning"],
+      ["Inventory checked", "Review inventory against the product report.", "Morning"],
+      ["Products needed added to PK to-do list", "Add all needed products to the PK to-do list.", "Morning"]
+    ];
+
+    const cleaningTasks = [
+      ["Tables Wiped", "Clean and sanitize all fulfillment work tables.", "Cleaning"],
+      ["Kirby Machines Cleaned", "Wipe down and clean Kirby machines before use.", "Cleaning"],
+      ["Vials", "Verify vial supply is restocked for the day.", "Restocking"],
+      ["Caps", "Verify cap supply is restocked for the day.", "Restocking"],
+      ["Commercial Products", "Verify commercial products are restocked, including Ondansetron, Metformin, etc.", "Restocking"]
+    ];
+
+    if (new Date().getDay() === 5) {
+      cleaningTasks.push([
+        "Expired Compounds Checked",
+        "Check and verify expired compounds have been reviewed.",
+        "Friday Check"
+      ]);
+    }
+
+    const form = document.getElementById("checklistForm");
+    const allTaskIds = [];
+    let activeChecklist = "morning";
+    const fixedStation = "Fulfillment";
+    const checklistLabels = {
+      morning: "Morning Product Checklist",
+      cleaning: "End-of-Day Cleaning"
+    };
+    const storageKeys = {
+      draft: "fulfillment-checklist-draft",
+      settings: "fulfillment-checklist-settings",
+      history: "fulfillment-checklist-history"
+    };
+
+    function taskId(group, index) {
+      return `${group}-${index}`;
+    }
+
+    function renderTasks(containerId, tasks, group) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+      tasks.forEach(([title, detail, category], index) => {
+        const id = taskId(group, index);
+        allTaskIds.push(id);
+        const row = document.createElement("label");
+        row.className = "task";
+        row.htmlFor = id;
+        row.innerHTML = `
+          <input type="checkbox" id="${id}" data-group="${group}" data-title="${escapeHtml(title)}" data-category="${escapeHtml(category || "")}">
+          <span>
+            <span class="task-title">${escapeHtml(title)}</span>
+            <span class="task-detail">${category ? `${escapeHtml(category)} - ` : ""}${escapeHtml(detail)}</span>
+          </span>
+          <span class="status-pill">Pending</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clockDate").textContent = now.toLocaleDateString([], {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+      document.getElementById("clockTime").textContent = now.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short"
+      });
+    }
+
+    function getCheckedIds() {
+      return allTaskIds.filter((id) => document.getElementById(id).checked);
+    }
+
+    function getActiveTaskIds() {
+      return allTaskIds.filter((id) => document.getElementById(id).dataset.group === activeChecklist);
+    }
+
+    function updateProgress() {
+      const activeTaskIds = getActiveTaskIds();
+      const checked = activeTaskIds.filter((id) => document.getElementById(id).checked);
+      const percent = activeTaskIds.length ? Math.round((checked.length / activeTaskIds.length) * 100) : 0;
+      document.getElementById("progressFill").style.width = `${percent}%`;
+      document.getElementById("progressText").textContent = `${checked.length} of ${activeTaskIds.length} ${checklistLabels[activeChecklist].toLowerCase()} tasks complete`;
+      document.getElementById("morningCount").textContent = `${countGroup("morning")} of ${morningTasks.length} complete`;
+      document.getElementById("cleaningCount").textContent = `${countGroup("cleaning")} of ${cleaningTasks.length} complete`;
+
+      allTaskIds.forEach((id) => {
+        const checkbox = document.getElementById(id);
+        const row = checkbox.closest(".task");
+        const status = row.querySelector(".status-pill");
+        row.classList.toggle("done", checkbox.checked);
+        status.textContent = checkbox.checked ? "Done" : "Pending";
+      });
+
+      const readyNotice = document.getElementById("readyNotice");
+      if (checked.length === activeTaskIds.length) {
+        readyNotice.className = "notice success";
+        readyNotice.textContent = `All ${checklistLabels[activeChecklist].toLowerCase()} items are complete and ready to submit.`;
+      } else {
+        readyNotice.className = "notice";
+        readyNotice.textContent = `Submission is allowed only after every visible ${checklistLabels[activeChecklist].toLowerCase()} item is complete.`;
+      }
+    }
+
+    function countGroup(group) {
+      return allTaskIds.filter((id) => id.startsWith(group) && document.getElementById(id).checked).length;
+    }
+
+    function getFormPayload() {
+      const now = new Date();
+      enforceFixedStation();
+      const tasks = getActiveTaskIds().map((id) => {
+        const checkbox = document.getElementById(id);
+        return {
+          title: checkbox.dataset.title,
+          group: checkbox.dataset.group,
+          category: checkbox.dataset.category,
+          complete: checkbox.checked
+        };
+      });
+
+      return {
+        checklistType: activeChecklist,
+        checklistTitle: checklistLabels[activeChecklist],
+        submittedAt: now.toISOString(),
+        submittedAtLocal: now.toLocaleString([], { timeZoneName: "short" }),
+        teamMember: document.getElementById("teamMember").value.trim(),
+        station: fixedStation,
+        shift: activeChecklist === "morning" ? "Morning" : "Closing",
+        location: document.getElementById("locationLabel").value.trim(),
+        notes: document.getElementById("notes").value.trim(),
+        tasks,
+        completeCount: tasks.filter((task) => task.complete).length,
+        totalCount: tasks.length
+      };
+    }
+
+    function saveDraft() {
+      enforceFixedStation();
+      const draft = {
+        teamMember: document.getElementById("teamMember").value,
+        station: fixedStation,
+        shift: document.getElementById("shift").value,
+        notes: document.getElementById("notes").value,
+        checked: getCheckedIds()
+      };
+      localStorage.setItem(storageKeys.draft, JSON.stringify(draft));
+    }
+
+    function loadDraft() {
+      const raw = localStorage.getItem(storageKeys.draft);
+      if (!raw) return;
+      try {
+        const draft = JSON.parse(raw);
+        document.getElementById("teamMember").value = draft.teamMember || "";
+        enforceFixedStation();
+        document.getElementById("shift").value = draft.shift || "Morning";
+        document.getElementById("notes").value = draft.notes || "";
+        (draft.checked || []).forEach((id) => {
+          if (document.getElementById(id)) document.getElementById(id).checked = true;
+        });
+      } catch {
+        localStorage.removeItem(storageKeys.draft);
+      }
+      enforceFixedStation();
+    }
+
+    function saveSettings() {
+      const settings = {
+        relayUrl: document.getElementById("relayUrl").value.trim(),
+        locationLabel: document.getElementById("locationLabel").value.trim()
+      };
+      localStorage.setItem(storageKeys.settings, JSON.stringify(settings));
+      showTemporaryNotice("Settings saved on this computer.", true);
+    }
+
+    function loadSettings() {
+      const raw = localStorage.getItem(storageKeys.settings);
+      if (!raw) return;
+      try {
+        const settings = JSON.parse(raw);
+        document.getElementById("relayUrl").value = settings.relayUrl || "";
+        document.getElementById("locationLabel").value = settings.locationLabel || "";
+      } catch {
+        localStorage.removeItem(storageKeys.settings);
+      }
+    }
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKeys.history)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistory(payload, deliveryStatus) {
+      const history = getHistory();
+      history.unshift({
+        ...payload,
+        deliveryStatus
+      });
+      localStorage.setItem(storageKeys.history, JSON.stringify(history.slice(0, 60)));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      const list = document.getElementById("historyList");
+      if (!history.length) {
+        list.innerHTML = `<div class="small">No submissions saved on this computer yet.</div>`;
+        return;
+      }
+      list.innerHTML = history.map((item) => `
+        <div class="history-item">
+          <strong>${escapeHtml(item.submittedAtLocal)}</strong>
+          ${escapeHtml(item.checklistTitle || "Checklist")} · ${escapeHtml(item.teamMember || "Unknown")}<br>
+          ${escapeHtml(item.station || "No station")}<br>
+          ${escapeHtml(item.completeCount)}/${escapeHtml(item.totalCount)} complete · ${escapeHtml(item.deliveryStatus)}
+        </div>
+      `).join("");
+    }
+
+    function resetForm() {
+      form.reset();
+      enforceFixedStation();
+      document.getElementById("shift").value = activeChecklist === "morning" ? "Morning" : "Closing";
+      getActiveTaskIds().forEach((id) => {
+        document.getElementById(id).checked = false;
+      });
+      localStorage.removeItem(storageKeys.draft);
+      updateProgress();
+    }
+
+    async function submitChecklist(event) {
+      event.preventDefault();
+      const payload = getFormPayload();
+      if (!payload.teamMember || !payload.station || !payload.shift) {
+        form.reportValidity();
+        return;
+      }
+      if (payload.completeCount !== payload.totalCount) {
+        showTemporaryNotice(`Finish every ${checklistLabels[activeChecklist].toLowerCase()} item before submitting.`, false);
+        return;
+      }
+
+      const relayUrl = document.getElementById("relayUrl").value.trim();
+      let deliveryStatus = "Saved locally only";
+      if (relayUrl) {
+        try {
+          await fetch(relayUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          deliveryStatus = "Sent to Slack";
+        } catch (error) {
+          deliveryStatus = `Slack send failed: ${error.message}`;
+        }
+      }
+
+      saveHistory(payload, deliveryStatus);
+      localStorage.removeItem(storageKeys.draft);
+      showTemporaryNotice(deliveryStatus, deliveryStatus === "Sent to Slack");
+    }
+
+    function exportCsv() {
+      const history = getHistory();
+      if (!history.length) {
+        showTemporaryNotice("No history to export yet.", false);
+        return;
+      }
+      const rows = [
+        ["Submitted At", "Team Member", "Station", "Shift", "Location", "Complete", "Total", "Delivery", "Notes"],
+        ...history.map((item) => [
+          item.submittedAtLocal,
+          item.teamMember,
+          item.station,
+          item.shift,
+          item.location,
+          item.completeCount,
+          item.totalCount,
+          item.deliveryStatus,
+          item.notes
+        ])
+      ];
+      const csv = rows.map((row) => row.map((value) => `"${String(value || "").replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `fulfillment-checklist-history-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function showTemporaryNotice(message, success) {
+      const readyNotice = document.getElementById("readyNotice");
+      readyNotice.className = success ? "notice success" : "notice";
+      readyNotice.textContent = message;
+      window.setTimeout(updateProgress, 4500);
+    }
+
+    function switchChecklist(nextChecklist) {
+      activeChecklist = nextChecklist;
+      document.querySelectorAll(".tab-button").forEach((button) => {
+        const isActive = button.dataset.checklist === activeChecklist;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-selected", String(isActive));
+      });
+      document.querySelectorAll("[data-checklist-section]").forEach((section) => {
+        section.classList.toggle("hidden", section.dataset.checklistSection !== activeChecklist);
+      });
+      document.getElementById("shift").value = activeChecklist === "morning" ? "Morning" : "Closing";
+      document.getElementById("submitButton").textContent = `Submit ${checklistLabels[activeChecklist]}`;
+      updateProgress();
+      saveDraft();
+    }
+
+    function enforceFixedStation() {
+      document.getElementById("station").value = fixedStation;
+    }
+
+    renderTasks("morningTasks", morningTasks, "morning");
+    renderTasks("cleaningTasks", cleaningTasks, "cleaning");
+    loadSettings();
+    loadDraft();
+    enforceFixedStation();
+    renderHistory();
+    updateClock();
+    updateProgress();
+    window.setInterval(updateClock, 1000);
+    form.addEventListener("change", () => {
+      updateProgress();
+      saveDraft();
+    });
+    form.addEventListener("input", saveDraft);
+    form.addEventListener("submit", submitChecklist);
+    document.getElementById("saveDraftButton").addEventListener("click", () => {
+      saveDraft();
+      showTemporaryNotice("Draft saved on this computer.", true);
+    });
+    document.getElementById("saveSettingsButton").addEventListener("click", saveSettings);
+    document.getElementById("resetButton").addEventListener("click", resetForm);
+    document.getElementById("exportButton").addEventListener("click", exportCsv);
+    document.getElementById("morningTab").addEventListener("click", () => switchChecklist("morning"));
+    document.getElementById("cleaningTab").addEventListener("click", () => switchChecklist("cleaning"));
+  </script>
+</body>
+</html>
