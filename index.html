@@ -425,7 +425,16 @@
   <header>
     <div class="header-inner">
       <div class="brand-lockup">
-        <img class="brand-logo" src="assets/scriptstation-logo.svg" alt="ScriptStation Intelligent Automation">
+        <svg class="brand-logo" viewBox="0 0 760 190" role="img" aria-labelledby="logoTitle logoDesc">
+          <title id="logoTitle">ScriptStation</title>
+          <desc id="logoDesc">ScriptStation Intelligent Automation logo</desc>
+          <rect width="760" height="190" fill="#ffffff"/>
+          <rect x="24" y="28" width="130" height="130" rx="26" fill="#172d3a"/>
+          <path d="M58 72 L88 98 L58 124" fill="none" stroke="#b8d9a9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M99 118 H130" fill="none" stroke="#dde77d" stroke-width="10" stroke-linecap="round"/>
+          <text x="205" y="105" fill="#172d3a" font-family="Inter, Arial, Helvetica, sans-serif" font-size="54" font-weight="800">ScriptStation</text>
+          <text x="207" y="142" fill="#61717d" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="500" letter-spacing="10">INTELLIGENT AUTOMATION</text>
+        </svg>
         <div class="brand-title">
         <h1>Fulfillment Daily Checklist</h1>
         </div>
@@ -567,6 +576,7 @@
     const allTaskIds = [];
     let activeChecklist = "morning";
     const fixedStation = "Fulfillment";
+    const defaultSlackRelayUrl = "";
     const checklistLabels = {
       morning: "Morning Product Checklist",
       cleaning: "End-of-Day Cleaning"
@@ -728,7 +738,7 @@
 
     function saveSettings() {
       const settings = {
-        relayUrl: document.getElementById("relayUrl").value.trim(),
+        relayUrl: getSlackRelayUrl(),
         locationLabel: document.getElementById("locationLabel").value.trim()
       };
       localStorage.setItem(storageKeys.settings, JSON.stringify(settings));
@@ -740,7 +750,7 @@
       if (!raw) return;
       try {
         const settings = JSON.parse(raw);
-        document.getElementById("relayUrl").value = settings.relayUrl || "";
+        document.getElementById("relayUrl").value = settings.relayUrl || defaultSlackRelayUrl;
         document.getElementById("locationLabel").value = settings.locationLabel || "";
       } catch {
         localStorage.removeItem(storageKeys.settings);
@@ -805,7 +815,7 @@
         return;
       }
 
-      const relayUrl = document.getElementById("relayUrl").value.trim();
+      const relayUrl = getSlackRelayUrl();
       let deliveryStatus = "Saved locally only";
       if (relayUrl) {
         try {
@@ -883,9 +893,14 @@
       document.getElementById("station").value = fixedStation;
     }
 
+    function getSlackRelayUrl() {
+      return document.getElementById("relayUrl").value.trim() || defaultSlackRelayUrl;
+    }
+
     renderTasks("morningTasks", morningTasks, "morning");
     renderTasks("cleaningTasks", cleaningTasks, "cleaning");
     loadSettings();
+    document.getElementById("relayUrl").value = getSlackRelayUrl();
     loadDraft();
     enforceFixedStation();
     renderHistory();

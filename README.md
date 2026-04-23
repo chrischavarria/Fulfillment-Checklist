@@ -23,11 +23,10 @@ The page has two tabs:
 GitHub Pages is optional, but it is a good way to give every fulfillment computer one shared URL.
 
 1. Create a new GitHub repository.
-2. Upload these files and folders to the repository root:
+2. Upload these files to the repository root:
    - `index.html`
    - `README.md`
    - `.nojekyll`
-   - `assets/`
 3. Go to the repository's Settings tab.
 4. Open Pages.
 5. Under Build and deployment, choose Deploy from a branch.
@@ -35,7 +34,7 @@ GitHub Pages is optional, but it is a good way to give every fulfillment compute
 7. Save.
 8. GitHub will give you a Pages URL after it deploys.
 
-The Slack webhook still belongs in Google Apps Script, not in GitHub. In the checklist page, paste the Google Apps Script Web App URL into `Slack relay URL`.
+The Slack webhook still belongs in Google Apps Script, not in GitHub. To avoid entering the relay URL on every computer, paste the Google Apps Script Web App URL into `defaultSlackRelayUrl` inside `index.html`.
 
 ## Slack Setup
 
@@ -50,7 +49,17 @@ Direct Slack webhooks are not ideal inside plain HTML because the webhook URL wo
 5. Deploy as a web app.
 6. Set access to anyone with the link, or your company workspace if your Google account supports it.
 7. Copy the web app URL.
-8. Open `index.html`, paste that URL into Slack relay URL, add a location label, and click Save Settings.
+8. Open `index.html` and paste that URL into this line:
+
+```js
+const defaultSlackRelayUrl = "";
+```
+
+For example:
+
+```js
+const defaultSlackRelayUrl = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+```
 
 When the active tab is fully complete and submitted, the page sends a timestamped message to Slack and also saves a local history entry.
 
