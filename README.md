@@ -9,8 +9,6 @@ Open `index.html` in Chrome, Edge, or Safari on each computer. You can put the f
 Each computer stores its own:
 
 - Draft checklist
-- Slack relay URL
-- Location label
 - Local submission history
 
 The page has two tabs:
@@ -61,7 +59,7 @@ For example:
 const defaultSlackRelayUrl = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
 ```
 
-When the active tab is fully complete and submitted, the page sends a timestamped message to Slack and also saves a local history entry.
+When the active tab is fully complete and submitted, the page sends a timestamped message to Slack and also saves a local history entry. The local history is only for quick confirmation on that computer; Slack is the primary record.
 
 ## Customizing Tasks
 

@@ -513,7 +513,7 @@
       </form>
     </section>
 
-    <aside class="sidebar" aria-label="Checklist status and settings">
+    <aside class="sidebar" aria-label="Checklist status">
       <div class="sidebar-title">
         <h3>Today</h3>
       </div>
@@ -528,23 +528,8 @@
       </div>
 
       <div class="side-section">
-        <h3>Slack Delivery</h3>
-        <label>
-          Slack relay URL
-          <input id="relayUrl" placeholder="Paste Google Apps Script web app URL">
-        </label>
-        <label>
-          Location label
-          <input id="locationLabel" placeholder="Warehouse, office, or computer name">
-        </label>
-        <button class="secondary" id="saveSettingsButton" type="button">Save Settings</button>
-        <div class="small">Settings are saved on this computer only. Use the same relay URL on each department computer.</div>
-      </div>
-
-      <div class="side-section">
         <h3>Submission History</h3>
         <div class="history-list" id="historyList"></div>
-        <button class="ghost" id="exportButton" type="button">Export CSV</button>
       </div>
     </aside>
   </main>
@@ -576,14 +561,13 @@
     const allTaskIds = [];
     let activeChecklist = "morning";
     const fixedStation = "Fulfillment";
-    const defaultSlackRelayUrl = "https://script.google.com/macros/s/AKfycbwzPc-nO2fTUCJtnF0NIEalhEaSfURbMWW21-t1weOFpZR0EaPAra3DrvuP0Wr-oTJZ/exec";
+    const defaultSlackRelayUrl = "";
     const checklistLabels = {
       morning: "Morning Product Checklist",
       cleaning: "End-of-Day Cleaning"
     };
     const storageKeys = {
       draft: "fulfillment-checklist-draft",
-      settings: "fulfillment-checklist-settings",
       history: "fulfillment-checklist-history"
     };
 
@@ -698,7 +682,7 @@
         teamMember: document.getElementById("teamMember").value.trim(),
         station: fixedStation,
         shift: activeChecklist === "morning" ? "Morning" : "Closing",
-        location: document.getElementById("locationLabel").value.trim(),
+        location: fixedStation,
         notes: document.getElementById("notes").value.trim(),
         tasks,
         completeCount: tasks.filter((task) => task.complete).length,
@@ -734,27 +718,6 @@
         localStorage.removeItem(storageKeys.draft);
       }
       enforceFixedStation();
-    }
-
-    function saveSettings() {
-      const settings = {
-        relayUrl: getSlackRelayUrl(),
-        locationLabel: document.getElementById("locationLabel").value.trim()
-      };
-      localStorage.setItem(storageKeys.settings, JSON.stringify(settings));
-      showTemporaryNotice("Settings saved on this computer.", true);
-    }
-
-    function loadSettings() {
-      const raw = localStorage.getItem(storageKeys.settings);
-      if (!raw) return;
-      try {
-        const settings = JSON.parse(raw);
-        document.getElementById("relayUrl").value = settings.relayUrl || defaultSlackRelayUrl;
-        document.getElementById("locationLabel").value = settings.locationLabel || "";
-      } catch {
-        localStorage.removeItem(storageKeys.settings);
-      }
     }
 
     function getHistory() {
@@ -836,36 +799,6 @@
       showTemporaryNotice(deliveryStatus, deliveryStatus === "Sent to Slack");
     }
 
-    function exportCsv() {
-      const history = getHistory();
-      if (!history.length) {
-        showTemporaryNotice("No history to export yet.", false);
-        return;
-      }
-      const rows = [
-        ["Submitted At", "Team Member", "Station", "Shift", "Location", "Complete", "Total", "Delivery", "Notes"],
-        ...history.map((item) => [
-          item.submittedAtLocal,
-          item.teamMember,
-          item.station,
-          item.shift,
-          item.location,
-          item.completeCount,
-          item.totalCount,
-          item.deliveryStatus,
-          item.notes
-        ])
-      ];
-      const csv = rows.map((row) => row.map((value) => `"${String(value || "").replace(/"/g, '""')}"`).join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `fulfillment-checklist-history-${new Date().toISOString().slice(0, 10)}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-    }
-
     function showTemporaryNotice(message, success) {
       const readyNotice = document.getElementById("readyNotice");
       readyNotice.className = success ? "notice success" : "notice";
@@ -894,13 +827,11 @@
     }
 
     function getSlackRelayUrl() {
-      return document.getElementById("relayUrl").value.trim() || defaultSlackRelayUrl;
+      return defaultSlackRelayUrl;
     }
 
     renderTasks("morningTasks", morningTasks, "morning");
     renderTasks("cleaningTasks", cleaningTasks, "cleaning");
-    loadSettings();
-    document.getElementById("relayUrl").value = getSlackRelayUrl();
     loadDraft();
     enforceFixedStation();
     renderHistory();
@@ -917,9 +848,7 @@
       saveDraft();
       showTemporaryNotice("Draft saved on this computer.", true);
     });
-    document.getElementById("saveSettingsButton").addEventListener("click", saveSettings);
     document.getElementById("resetButton").addEventListener("click", resetForm);
-    document.getElementById("exportButton").addEventListener("click", exportCsv);
     document.getElementById("morningTab").addEventListener("click", () => switchChecklist("morning"));
     document.getElementById("cleaningTab").addEventListener("click", () => switchChecklist("cleaning"));
   </script>
