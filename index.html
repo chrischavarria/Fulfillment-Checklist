@@ -4,420 +4,292 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fulfillment Daily Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: light;
-      --ink: #1f2933;
-      --muted: #667085;
-      --line: #d7dde5;
+      --ink: #18262c;
+      --ink-2: #3f5159;
+      --muted: #6f7f85;
+      --faint: #93a1a6;
+      --line: #e4e8e6;
+      --line-2: #d7ddda;
       --panel: #ffffff;
-      --bg: #f4f7f9;
-      --accent: #136f63;
-      --accent-2: #235789;
-      --danger: #b42318;
-      --warn: #b54708;
-      --done: #067647;
-      --shadow: 0 10px 30px rgba(31, 41, 51, 0.08);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #eceeec;
+      --brand: #172d3a;
+      --brand-2: #21404f;
+      --primary: #172d3a;
+      --green: #2f7a56;
+      --green-deep: #246245;
+      --green-soft: #edf5f0;
+      --green-line: #cfe5d8;
+      --info-bg: #f1f4f6;
+      --info-line: #dde4e8;
+      --radius: 12px;
+      --radius-sm: 9px;
+      --shadow-sm: 0 1px 2px rgba(20, 38, 44, 0.05);
+      --shadow: 0 6px 22px rgba(20, 38, 44, 0.07), 0 1px 2px rgba(20, 38, 44, 0.05);
+      font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
+      min-height: 100vh;
       color: var(--ink);
-      background: var(--bg);
+      background:
+        radial-gradient(1200px 480px at 100% -10%, rgba(23, 45, 58, 0.05), transparent 60%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
     }
 
-    button,
-    input,
-    select,
-    textarea {
-      font: inherit;
-    }
+    button, input, select, textarea { font: inherit; color: inherit; }
 
+    /* ---------- header ---------- */
     header {
-      background: #12343b;
+      background: linear-gradient(180deg, #1b3543, var(--brand));
       color: #fff;
-      padding: 22px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .header-inner {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1180px;
-      margin: 0 auto;
+      display: flex; gap: 24px; align-items: center; justify-content: space-between;
+      max-width: 1200px; margin: 0 auto; padding: 20px 28px;
     }
 
-    .brand-lockup {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-      min-width: 0;
-    }
+    .brand-lockup { display: flex; gap: 20px; align-items: center; min-width: 0; }
 
     .brand-logo {
-      display: block;
-      width: clamp(210px, 34vw, 360px);
-      height: auto;
-      border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+      display: block; width: 186px; height: auto;
+      background: #fff; border-radius: 10px; padding: 8px 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
 
-    .brand-title {
-      display: grid;
-      gap: 6px;
-      min-width: 0;
+    .brand-divider { width: 1px; align-self: stretch; background: rgba(255, 255, 255, 0.16); }
+
+    .brand-title { display: grid; gap: 5px; min-width: 0; }
+
+    .eyebrow {
+      font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500;
+      letter-spacing: 0.22em; text-transform: uppercase; color: #9fc7b4;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.1;
-      letter-spacing: 0;
-    }
+    h1 { margin: 0; font-size: 25px; line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; }
 
     .clock {
-      min-width: 275px;
-      padding: 12px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      text-align: right;
+      min-width: 240px; padding: 11px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06); text-align: right;
     }
 
-    .clock strong {
-      display: block;
-      font-size: 20px;
-      line-height: 1.2;
-    }
+    .clock strong { display: block; font-size: 15px; font-weight: 600; line-height: 1.3; }
 
     .clock span {
-      color: rgba(255, 255, 255, 0.78);
-      font-size: 13px;
+      display: block; margin-top: 2px;
+      font-family: "IBM Plex Mono", monospace; font-size: 12.5px;
+      letter-spacing: 0.02em; color: rgba(255, 255, 255, 0.7);
     }
 
+    /* ---------- layout ---------- */
     main {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
-      gap: 18px;
-      max-width: 1180px;
-      margin: 20px auto;
-      padding: 0 18px 28px;
+      display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 22px;
+      max-width: 1200px; margin: 26px auto; padding: 0 28px 40px;
     }
 
-    .workspace {
-      display: grid;
-      gap: 18px;
+    .workspace { display: grid; gap: 18px; }
+
+    .panel, .sidebar {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
     }
 
-    .panel,
-    .sidebar {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: var(--shadow);
+    .panel { overflow: hidden; }
+
+    .panel-title, .sidebar-title {
+      display: flex; gap: 12px; align-items: center; justify-content: space-between;
+      padding: 15px 20px; border-bottom: 1px solid var(--line);
     }
 
-    .panel {
-      overflow: hidden;
+    h2 { margin: 0; font-size: 15.5px; font-weight: 600; letter-spacing: -0.005em; }
+    h3 { margin: 0; font-size: 14px; font-weight: 600; }
+
+    .count-tag {
+      font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 500;
+      color: var(--muted); white-space: nowrap;
     }
 
-    .panel-title,
-    .sidebar-title {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    h2,
-    h3 {
-      margin: 0;
-      letter-spacing: 0;
-    }
-
-    h2 {
-      font-size: 20px;
-    }
-
-    h3 {
-      font-size: 16px;
-    }
-
-    .meta-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      padding: 18px;
-    }
-
-    label {
-      display: grid;
-      gap: 6px;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    input,
-    select,
-    textarea {
-      width: 100%;
-      min-height: 42px;
-      border: 1px solid #c9d2dc;
-      border-radius: 7px;
-      color: var(--ink);
-      background: #fff;
-      padding: 9px 11px;
-    }
-
-    textarea {
-      min-height: 92px;
-      resize: vertical;
-    }
-
-    .checklist {
-      display: grid;
-      gap: 0;
-    }
-
+    /* ---------- segmented tabs ---------- */
     .tabs {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;
+      padding: 4px; background: #e6ebe8; border: 1px solid var(--line);
+      border-radius: 11px;
     }
 
     .tab-button {
-      color: var(--accent-2);
-      border-color: #b7c8dc;
-      background: #f7fbff;
+      min-height: 40px; border: 1px solid transparent; border-radius: 8px;
+      background: transparent; color: var(--ink-2); cursor: pointer;
+      font-size: 14px; font-weight: 600; letter-spacing: -0.005em;
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
+
+    .tab-button:hover { color: var(--ink); }
 
     .tab-button.active {
-      color: #fff;
-      border-color: var(--accent);
-      background: var(--accent);
+      background: var(--panel); color: var(--brand);
+      box-shadow: var(--shadow-sm); border-color: var(--line);
     }
+
+    /* ---------- form fields ---------- */
+    .meta-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 20px; }
+
+    label { display: grid; gap: 7px; color: var(--muted); }
+
+    .field-label {
+      font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 500;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+    }
+
+    input, select, textarea {
+      width: 100%; min-height: 42px; border: 1px solid var(--line-2);
+      border-radius: var(--radius-sm); color: var(--ink); background: #fff;
+      padding: 10px 12px; font-size: 14px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: var(--brand-2);
+      box-shadow: 0 0 0 3px rgba(33, 64, 79, 0.12);
+    }
+
+    input[readonly] { background: #f3f5f4; color: var(--ink-2); cursor: default; }
+
+    textarea { min-height: 88px; resize: vertical; line-height: 1.5; }
+
+    select {
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236f7f85' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+    }
+
+    /* ---------- checklist ---------- */
+    .checklist { display: grid; gap: 0; }
 
     .task {
-      display: grid;
-      grid-template-columns: 28px minmax(0, 1fr) 110px;
-      gap: 12px;
-      align-items: start;
-      padding: 13px 18px;
-      border-top: 1px solid #eef1f4;
+      display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 14px;
+      align-items: start; padding: 14px 20px; border-top: 1px solid var(--line);
+      cursor: pointer; transition: background 0.12s ease;
     }
+
+    .task:hover { background: #f7faf8; }
 
     .task input[type="checkbox"] {
-      width: 22px;
-      min-height: 22px;
-      margin: 2px 0 0;
-      accent-color: var(--accent);
+      width: 20px; min-height: 20px; height: 20px; margin: 1px 0 0; padding: 0;
+      accent-color: var(--green); cursor: pointer;
     }
 
-    .task-title {
-      color: var(--ink);
-      font-weight: 750;
-      line-height: 1.35;
-    }
+    .task-body { display: grid; gap: 3px; min-width: 0; }
+    .task-title { color: var(--ink); font-weight: 600; font-size: 14px; line-height: 1.4; }
+    .task-detail { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
 
-    .task-detail {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
+    .task-cat {
+      display: inline-block; margin-right: 8px; vertical-align: 1px;
+      font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 500;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2);
+      background: #eef1ef; border: 1px solid var(--line); border-radius: 5px;
+      padding: 2px 6px;
     }
 
     .status-pill {
-      justify-self: end;
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid #cad5df;
-      padding: 5px 9px;
-      color: var(--muted);
-      background: #f8fafc;
-      font-size: 12px;
-      font-weight: 800;
-      text-align: center;
+      justify-self: end; align-self: center;
+      font-family: "IBM Plex Mono", monospace; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      border-radius: 999px; border: 1px solid var(--line-2);
+      padding: 5px 11px; color: var(--faint); background: #f4f6f5; white-space: nowrap;
     }
 
-    .task.done .status-pill {
-      color: #fff;
-      border-color: var(--done);
-      background: var(--done);
-    }
+    .task.done { background: #f6faf7; }
+    .task.done .status-pill { color: #fff; border-color: var(--green-deep); background: var(--green); }
+    .task.done .task-title { color: var(--green-deep); }
 
-    .task.done .task-title {
-      color: var(--done);
-    }
-
+    /* ---------- actions ---------- */
     .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      padding: 18px;
-      border-top: 1px solid var(--line);
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      padding: 18px 20px; border-top: 1px solid var(--line);
     }
 
-    button {
-      min-height: 42px;
-      border: 1px solid transparent;
-      border-radius: 7px;
-      padding: 9px 14px;
-      cursor: pointer;
-      font-weight: 800;
+    .actions button {
+      min-height: 42px; border: 1px solid transparent; border-radius: var(--radius-sm);
+      padding: 10px 18px; cursor: pointer; font-size: 14px; font-weight: 600;
+      letter-spacing: -0.005em; transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
     }
 
-    .primary {
-      color: #fff;
-      background: var(--accent);
-    }
+    .actions button:active { transform: translateY(1px); }
 
-    .secondary {
-      color: var(--accent-2);
-      border-color: #b7c8dc;
-      background: #f7fbff;
-    }
+    .primary { color: #fff; background: var(--primary); }
+    .primary:hover { background: var(--brand-2); }
 
-    .ghost {
-      color: var(--ink);
-      border-color: #cfd7e1;
-      background: #fff;
-    }
+    .secondary { color: var(--ink); border-color: var(--line-2); background: #fff; }
+    .secondary:hover { background: #f5f7f6; border-color: var(--brand-2); }
 
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
+    .ghost { color: var(--muted); border-color: transparent; background: transparent; }
+    .ghost:hover { color: var(--ink); background: #f1f3f2; }
 
-    .sidebar {
-      align-self: start;
-      overflow: hidden;
-    }
+    button:disabled { cursor: not-allowed; opacity: 0.5; }
 
-    .side-section {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-      border-top: 1px solid var(--line);
-    }
+    /* ---------- sidebar ---------- */
+    .sidebar { align-self: start; overflow: hidden; position: sticky; top: 22px; }
 
-    .progress-wrap {
-      display: grid;
-      gap: 8px;
-    }
+    .side-section { display: grid; gap: 13px; padding: 18px 20px; border-top: 1px solid var(--line); }
 
-    .progress-bar {
-      height: 12px;
-      overflow: hidden;
-      border-radius: 999px;
-      background: #e6ebf0;
-    }
-
-    .progress-fill {
-      width: 0%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      transition: width 0.2s ease;
-    }
-
-    .progress-text,
-    .small {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-    }
+    .progress-wrap { display: grid; gap: 10px; }
+    .progress-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .progress-pct { font-family: "IBM Plex Mono", monospace; font-size: 22px; font-weight: 600; color: var(--brand); line-height: 1; }
+    .progress-bar { height: 8px; overflow: hidden; border-radius: 999px; background: #e7ebe9; }
+    .progress-fill { width: 0%; height: 100%; border-radius: inherit; background: var(--green); transition: width 0.25s ease; }
+    .progress-text, .small { color: var(--muted); font-size: 12.5px; line-height: 1.45; }
 
     .notice {
-      border-left: 4px solid var(--warn);
-      background: #fff7ed;
-      padding: 10px 12px;
-      color: #7c2d12;
-      font-size: 13px;
-      line-height: 1.35;
+      border: 1px solid var(--info-line); border-left: 3px solid var(--faint);
+      background: var(--info-bg); padding: 11px 13px; border-radius: 8px;
+      color: var(--ink-2); font-size: 12.5px; line-height: 1.45;
     }
 
-    .success {
-      border-left-color: var(--done);
-      background: #ecfdf3;
-      color: #085d3a;
+    .notice.success {
+      border-color: var(--green-line); border-left-color: var(--green);
+      background: var(--green-soft); color: var(--green-deep);
     }
 
-    .history-list {
-      display: grid;
-      gap: 8px;
-      max-height: 260px;
-      overflow: auto;
-    }
+    .history-list { display: grid; gap: 8px; max-height: 320px; overflow: auto; }
 
     .history-item {
-      border: 1px solid #e2e8f0;
-      border-radius: 7px;
-      padding: 9px;
-      background: #fbfcfd;
-      font-size: 13px;
+      border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px;
+      background: #fafbfb; font-size: 12.5px; color: var(--ink-2); line-height: 1.5;
     }
 
     .history-item strong {
-      display: block;
-      margin-bottom: 3px;
+      display: block; margin-bottom: 4px; color: var(--ink); font-weight: 600;
+      font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.01em;
     }
 
-    .hidden {
-      display: none !important;
+    .hidden { display: none !important; }
+
+    @media (max-width: 940px) {
+      main { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .header-inner { flex-direction: column; align-items: stretch; }
+      .brand-lockup { align-items: flex-start; }
+      .clock { min-width: 0; text-align: left; }
+      .meta-grid { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 900px) {
-      .header-inner,
-      main {
-        grid-template-columns: 1fr;
-      }
-
-      .header-inner {
-        align-items: stretch;
-      }
-
-      .brand-lockup {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .brand-logo {
-        width: min(100%, 330px);
-      }
-
-      .clock {
-        min-width: 0;
-        text-align: left;
-      }
-
-      .meta-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tabs {
-        grid-template-columns: 1fr;
-      }
-
-      .task {
-        grid-template-columns: 28px minmax(0, 1fr);
-      }
-
-      .status-pill {
-        grid-column: 2;
-        justify-self: start;
-        width: auto;
-      }
+    @media (max-width: 560px) {
+      .brand-lockup { flex-direction: column; }
+      .brand-divider { display: none; }
+      .task { grid-template-columns: 24px minmax(0, 1fr); }
+      .status-pill { grid-column: 2; justify-self: start; margin-top: 2px; }
     }
   </style>
 </head>
@@ -428,15 +300,16 @@
         <svg class="brand-logo" viewBox="0 0 760 190" role="img" aria-labelledby="logoTitle logoDesc">
           <title id="logoTitle">ScriptStation</title>
           <desc id="logoDesc">ScriptStation Intelligent Automation logo</desc>
-          <rect width="760" height="190" fill="#ffffff"/>
-          <rect x="24" y="28" width="130" height="130" rx="26" fill="#172d3a"/>
-          <path d="M58 72 L88 98 L58 124" fill="none" stroke="#b8d9a9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M99 118 H130" fill="none" stroke="#dde77d" stroke-width="10" stroke-linecap="round"/>
-          <text x="205" y="105" fill="#172d3a" font-family="Inter, Arial, Helvetica, sans-serif" font-size="54" font-weight="800">ScriptStation</text>
-          <text x="207" y="142" fill="#61717d" font-family="Inter, Arial, Helvetica, sans-serif" font-size="18" font-weight="500" letter-spacing="10">INTELLIGENT AUTOMATION</text>
+          <rect x="24" y="28" width="130" height="130" rx="26" fill="#172d3a"></rect>
+          <path d="M58 72 L88 98 L58 124" fill="none" stroke="#b8d9a9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M99 118 H130" fill="none" stroke="#dde77d" stroke-width="10" stroke-linecap="round"></path>
+          <text x="205" y="105" fill="#172d3a" font-family="'IBM Plex Sans', Arial, sans-serif" font-size="54" font-weight="700">ScriptStation</text>
+          <text x="207" y="142" fill="#61717d" font-family="'IBM Plex Mono', monospace" font-size="17" font-weight="500" letter-spacing="9">INTELLIGENT AUTOMATION</text>
         </svg>
+        <div class="brand-divider"></div>
         <div class="brand-title">
-        <h1>Fulfillment Daily Checklist</h1>
+          <div class="eyebrow">Daily Operations</div>
+          <h1>Fulfillment Daily Checklist</h1>
         </div>
       </div>
       <div class="clock" aria-live="polite">
@@ -460,15 +333,15 @@
           </div>
           <div class="meta-grid">
             <label>
-              Team member
-              <input id="teamMember" name="teamMember" autocomplete="name" required>
+              <span class="field-label">Team member</span>
+              <input id="teamMember" name="teamMember" autocomplete="name" placeholder="Full name" required>
             </label>
             <label>
-              Station
+              <span class="field-label">Station</span>
               <input id="station" name="station" value="Fulfillment" readonly required>
             </label>
             <label>
-              Shift
+              <span class="field-label">Shift</span>
               <select id="shift" name="shift" required>
                 <option>Morning</option>
                 <option>Midday</option>
@@ -481,7 +354,7 @@
         <section class="panel" aria-labelledby="morningTitle" data-checklist-section="morning">
           <div class="panel-title">
             <h2 id="morningTitle">Morning Product Checklist</h2>
-            <span class="small" id="morningCount">0 complete</span>
+            <span class="count-tag" id="morningCount">0 complete</span>
           </div>
           <div class="checklist" id="morningTasks"></div>
         </section>
@@ -489,7 +362,7 @@
         <section class="panel hidden" aria-labelledby="cleaningTitle" data-checklist-section="cleaning">
           <div class="panel-title">
             <h2 id="cleaningTitle">End-of-Day Cleaning</h2>
-            <span class="small" id="cleaningCount">0 complete</span>
+            <span class="count-tag" id="cleaningCount">0 complete</span>
           </div>
           <div class="checklist" id="cleaningTasks"></div>
         </section>
@@ -500,7 +373,7 @@
           </div>
           <div class="meta-grid" style="grid-template-columns: 1fr;">
             <label>
-              Issues, missing supplies, or handoff notes
+              <span class="field-label">Issues, missing supplies, or handoff notes</span>
               <textarea id="notes" name="notes" placeholder="Optional"></textarea>
             </label>
           </div>
@@ -519,6 +392,10 @@
       </div>
       <div class="side-section">
         <div class="progress-wrap">
+          <div class="progress-head">
+            <span class="small" id="progressLabel">Progress</span>
+            <span class="progress-pct" id="progressPct">0%</span>
+          </div>
           <div class="progress-bar" aria-hidden="true">
             <div class="progress-fill" id="progressFill"></div>
           </div>
@@ -590,9 +467,9 @@
         row.htmlFor = id;
         row.innerHTML = `
           <input type="checkbox" id="${id}" data-group="${group}" data-title="${escapeHtml(title)}" data-category="${escapeHtml(category || "")}">
-          <span>
+          <span class="task-body">
             <span class="task-title">${escapeHtml(title)}</span>
-            <span class="task-detail">${category ? `${escapeHtml(category)} - ` : ""}${escapeHtml(detail)}</span>
+            <span class="task-detail">${category ? `<span class="task-cat">${escapeHtml(category)}</span>` : ""}${escapeHtml(detail)}</span>
           </span>
           <span class="status-pill">Pending</span>
         `;
@@ -639,6 +516,7 @@
       const checked = activeTaskIds.filter((id) => document.getElementById(id).checked);
       const percent = activeTaskIds.length ? Math.round((checked.length / activeTaskIds.length) * 100) : 0;
       document.getElementById("progressFill").style.width = `${percent}%`;
+      document.getElementById("progressPct").textContent = `${percent}%`;
       document.getElementById("progressText").textContent = `${checked.length} of ${activeTaskIds.length} ${checklistLabels[activeChecklist].toLowerCase()} tasks complete`;
       document.getElementById("morningCount").textContent = `${countGroup("morning")} of ${morningTasks.length} complete`;
       document.getElementById("cleaningCount").textContent = `${countGroup("cleaning")} of ${cleaningTasks.length} complete`;
@@ -652,6 +530,7 @@
       });
 
       const readyNotice = document.getElementById("readyNotice");
+      readyNotice.classList.remove("hidden");
       if (checked.length === activeTaskIds.length) {
         readyNotice.className = "notice success";
         readyNotice.textContent = `All ${checklistLabels[activeChecklist].toLowerCase()} items are complete and ready to submit.`;
@@ -752,9 +631,9 @@
       list.innerHTML = history.map((item) => `
         <div class="history-item">
           <strong>${escapeHtml(item.submittedAtLocal)}</strong>
-          ${escapeHtml(item.checklistTitle || "Checklist")} · ${escapeHtml(item.teamMember || "Unknown")}<br>
+          ${escapeHtml(item.checklistTitle || "Checklist")} &middot; ${escapeHtml(item.teamMember || "Unknown")}<br>
           ${escapeHtml(item.station || "No station")}<br>
-          ${escapeHtml(item.completeCount)}/${escapeHtml(item.totalCount)} complete · ${escapeHtml(item.deliveryStatus)}
+          ${escapeHtml(item.completeCount)}/${escapeHtml(item.totalCount)} complete &middot; ${escapeHtml(item.deliveryStatus)}
         </div>
       `).join("");
     }
@@ -814,6 +693,7 @@
 
     function showTemporaryNotice(message, success) {
       const readyNotice = document.getElementById("readyNotice");
+      readyNotice.classList.remove("hidden");
       readyNotice.className = success ? "notice success" : "notice";
       readyNotice.textContent = message;
       window.setTimeout(updateProgress, 4500);
