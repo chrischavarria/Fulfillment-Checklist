@@ -230,6 +230,8 @@
 
     .primary { color: #fff; background: var(--primary); }
     .primary:hover { background: var(--brand-2); }
+    .primary.submitted { background: var(--green); border-color: var(--green-deep); }
+    .primary.submitted:hover { background: var(--green); }
 
     .secondary { color: var(--ink); border-color: var(--line-2); background: #fff; }
     .secondary:hover { background: #f5f7f6; border-color: var(--brand-2); }
@@ -441,6 +443,7 @@
     const form = document.getElementById("checklistForm");
     const allTaskIds = [];
     let activeChecklist = "morning";
+    let isSubmitting = false;
     const fixedStation = "Fulfillment";
     const defaultSlackRelayUrl = "https://script.google.com/macros/s/AKfycbw2krNXGlWZYYNlRJcID2C60ZwwgZ3556MDMdcayfcGm6SGApVNNmQu2g782FhJz_Oq8A/exec";
     const checklistLabels = {
@@ -640,6 +643,7 @@
 
     function resetForm() {
       form.reset();
+      isSubmitting = false;
       enforceFixedStation();
       document.getElementById("shift").value = activeChecklist === "morning" ? "Morning" : "Closing";
       getActiveTaskIds().forEach((id) => {
@@ -647,10 +651,13 @@
       });
       localStorage.removeItem(storageKeys.draft);
       updateProgress();
+      resetSubmitButton();
     }
 
     async function submitChecklist(event) {
       event.preventDefault();
+      if (isSubmitting) return;
+
       const payload = getFormPayload();
       if (!payload.teamMember || !payload.station || !payload.shift) {
         form.reportValidity();
@@ -663,6 +670,8 @@
 
       const relayUrl = getSlackRelayUrl();
       let deliveryStatus = "Saved locally only";
+      isSubmitting = true;
+      setSubmitButtonState("submitting");
       if (relayUrl) {
         try {
           await fetch(relayUrl, {
@@ -678,7 +687,14 @@
       }
 
       saveHistory(payload, deliveryStatus);
-      clearSubmittedChecklist();
+      if (deliveryStatus === "Sent to Slack" || deliveryStatus === "Saved locally only") {
+        clearSubmittedChecklist();
+        setSubmitButtonState("submitted");
+        isSubmitting = false;
+      } else {
+        isSubmitting = false;
+        resetSubmitButton();
+      }
       showTemporaryNotice(deliveryStatus, deliveryStatus === "Sent to Slack");
     }
 
@@ -689,6 +705,26 @@
       document.getElementById("notes").value = "";
       localStorage.removeItem(storageKeys.draft);
       updateProgress();
+    }
+
+    function setSubmitButtonState(state) {
+      const button = document.getElementById("submitButton");
+      button.classList.toggle("submitted", state === "submitted");
+      if (state === "submitting") {
+        button.disabled = true;
+        button.textContent = "Submitting...";
+      } else if (state === "submitted") {
+        button.disabled = true;
+        button.textContent = "Submitted Successfully";
+      } else {
+        button.disabled = false;
+        button.textContent = `Submit ${checklistLabels[activeChecklist]}`;
+      }
+    }
+
+    function resetSubmitButton() {
+      if (isSubmitting) return;
+      setSubmitButtonState("ready");
     }
 
     function showTemporaryNotice(message, success) {
@@ -710,7 +746,8 @@
         section.classList.toggle("hidden", section.dataset.checklistSection !== activeChecklist);
       });
       document.getElementById("shift").value = activeChecklist === "morning" ? "Morning" : "Closing";
-      document.getElementById("submitButton").textContent = `Submit ${checklistLabels[activeChecklist]}`;
+      isSubmitting = false;
+      resetSubmitButton();
       updateProgress();
       saveDraft();
     }
@@ -733,9 +770,13 @@
     window.setInterval(updateClock, 1000);
     form.addEventListener("change", () => {
       updateProgress();
+      resetSubmitButton();
       saveDraft();
     });
-    form.addEventListener("input", saveDraft);
+    form.addEventListener("input", () => {
+      resetSubmitButton();
+      saveDraft();
+    });
     form.addEventListener("submit", submitChecklist);
     document.getElementById("saveDraftButton").addEventListener("click", () => {
       saveDraft();
