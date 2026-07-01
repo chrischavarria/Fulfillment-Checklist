@@ -2,6 +2,20 @@ const SLACK_WEBHOOK_URL = "PASTE_YOUR_SLACK_INCOMING_WEBHOOK_URL_HERE";
 const GOOGLE_SHEET_ID = "PASTE_YOUR_GOOGLE_SHEET_ID_HERE";
 const MORNING_SHEET_TAB_NAME = "Morning Product Checklist";
 const CLEANING_SHEET_TAB_NAME = "End-of-Day Cleaning";
+const ARCHIVE_FOLDER_ID = "";
+const ARCHIVE_FOLDER_NAME = "Fulfillment Checklist Archives";
+const SHEET_HEADERS = [
+  "Logged At",
+  "Submitted At",
+  "Checklist",
+  "Submitted By",
+  "Station",
+  "Shift",
+  "Location",
+  "Completion",
+  "Items",
+  "Notes"
+];
 
 function doPost(e) {
   const payload = JSON.parse(e.postData.contents || "{}");
@@ -93,6 +107,7 @@ function appendSubmissionToSheet(payload, submittedTasks) {
       submittedTasks.replace(/\*/g, ""),
       payload.notes || ""
     ]);
+    appendWeekendClosureRowsIfNeeded(sheet, payload);
     return { ok: true, message: `saved to ${sheetName}` };
   } catch (error) {
     console.error(`Google Sheet logging failed: ${error.message}`);
@@ -134,6 +149,155 @@ function testCleaningSheetLogging() {
   console.log(result.message);
 }
 
+function archivePriorMonthLogs() {
+  if (!GOOGLE_SHEET_ID || GOOGLE_SHEET_ID === "PASTE_YOUR_GOOGLE_SHEET_ID_HERE") {
+    console.log("Google Sheet logging is not configured.");
+    return;
+  }
+
+  const liveSpreadsheet = SpreadsheetApp.openById(GOOGLE_SHEET_ID);
+  const archiveFolder = getArchiveFolder();
+  const currentMonthStart = getMonthStart(new Date());
+  const archiveGroups = {};
+  const deletePlans = [];
+
+  [MORNING_SHEET_TAB_NAME, CLEANING_SHEET_TAB_NAME].forEach((sheetName) => {
+    const sheet = liveSpreadsheet.getSheetByName(sheetName);
+    if (!sheet || sheet.getLastRow() < 2) return;
+
+    ensureHeaderRow(sheet);
+    const values = sheet.getDataRange().getValues();
+    const rowsToDelete = [];
+
+    for (let index = 1; index < values.length; index += 1) {
+      const row = values[index];
+      const loggedAt = coerceDate(row[0]) || coerceDate(row[1]);
+      if (!loggedAt || loggedAt >= currentMonthStart) continue;
+
+      const monthKey = Utilities.formatDate(loggedAt, Session.getScriptTimeZone(), "yyyy-MM");
+      if (!archiveGroups[monthKey]) archiveGroups[monthKey] = {};
+      if (!archiveGroups[monthKey][sheetName]) archiveGroups[monthKey][sheetName] = [];
+      archiveGroups[monthKey][sheetName].push(row);
+      rowsToDelete.push(index + 1);
+    }
+
+    if (rowsToDelete.length) {
+      deletePlans.push({ sheet, rowsToDelete });
+    }
+  });
+
+  Object.keys(archiveGroups).forEach((monthKey) => {
+    const archiveSpreadsheet = getOrCreateArchiveSpreadsheet(archiveFolder, monthKey);
+    Object.keys(archiveGroups[monthKey]).forEach((sheetName) => {
+      const archiveSheet = getOrCreateSheet(archiveSpreadsheet, sheetName);
+      ensureHeaderRow(archiveSheet);
+      appendRows(archiveSheet, archiveGroups[monthKey][sheetName]);
+    });
+  });
+
+  deletePlans.forEach(({ sheet, rowsToDelete }) => {
+    rowsToDelete.reverse().forEach((rowNumber) => sheet.deleteRow(rowNumber));
+  });
+}
+
+function createMonthlyArchiveTrigger() {
+  ScriptApp.getProjectTriggers().forEach((trigger) => {
+    if (trigger.getHandlerFunction() === "archivePriorMonthLogs") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
+  ScriptApp.newTrigger("archivePriorMonthLogs")
+    .timeBased()
+    .onMonthDay(1)
+    .atHour(1)
+    .create();
+}
+
+function appendWeekendClosureRowsIfNeeded(sheet, payload) {
+  if (payload.checklistType !== "cleaning") return;
+
+  const submittedDate = coerceDate(payload.submittedAt) || new Date();
+  if (submittedDate.getDay() !== 5) return;
+
+  const saturday = addDays(getDayStart(submittedDate), 1);
+  const sunday = addDays(getDayStart(submittedDate), 2);
+  appendClosureRowIfMissing(sheet, saturday, "Closed Saturday");
+  appendClosureRowIfMissing(sheet, sunday, "Closed Sunday");
+}
+
+function appendClosureRowIfMissing(sheet, date, checklistTitle) {
+  const submittedAt = Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  const existingRows = sheet.getDataRange().getValues();
+  const exists = existingRows.some((row) => (
+    String(row[1]) === submittedAt &&
+    String(row[2]) === checklistTitle &&
+    String(row[3]) === "System"
+  ));
+
+  if (exists) return;
+
+  sheet.appendRow([
+    new Date(),
+    submittedAt,
+    checklistTitle,
+    "System",
+    "Fulfillment",
+    "Closed",
+    "Fulfillment",
+    "Closed",
+    `${checklistTitle} automatically added after Friday end-of-day cleaning submission.`,
+    "Automatically added after Friday end-of-day cleaning submission."
+  ]);
+}
+
+function getArchiveFolder() {
+  if (ARCHIVE_FOLDER_ID) return DriveApp.getFolderById(ARCHIVE_FOLDER_ID);
+
+  const folders = DriveApp.getFoldersByName(ARCHIVE_FOLDER_NAME);
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder(ARCHIVE_FOLDER_NAME);
+}
+
+function getOrCreateArchiveSpreadsheet(folder, monthKey) {
+  const archiveName = `Fulfillment Checklist Archive ${monthKey}`;
+  const files = folder.getFilesByName(archiveName);
+  if (files.hasNext()) return SpreadsheetApp.openById(files.next().getId());
+
+  const spreadsheet = SpreadsheetApp.create(archiveName);
+  DriveApp.getFileById(spreadsheet.getId()).moveTo(folder);
+  const defaultSheet = spreadsheet.getSheets()[0];
+  defaultSheet.setName(MORNING_SHEET_TAB_NAME);
+  ensureHeaderRow(defaultSheet);
+  return spreadsheet;
+}
+
+function appendRows(sheet, rows) {
+  if (!rows.length) return;
+  sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+function getMonthStart(date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getDayStart(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function addDays(date, days) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+  return nextDate;
+}
+
+function coerceDate(value) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function getSheetNameForChecklist(checklistType) {
   if (checklistType === "cleaning") return CLEANING_SHEET_TAB_NAME;
   return MORNING_SHEET_TAB_NAME;
@@ -145,18 +309,7 @@ function getOrCreateSheet(spreadsheet, sheetName) {
 
 function ensureHeaderRow(sheet) {
   if (sheet.getLastRow() > 0) return;
-  sheet.appendRow([
-    "Logged At",
-    "Submitted At",
-    "Checklist",
-    "Submitted By",
-    "Station",
-    "Shift",
-    "Location",
-    "Completion",
-    "Items",
-    "Notes"
-  ]);
+  sheet.appendRow(SHEET_HEADERS);
 }
 
 function formatTaskGroup(tasks, group) {

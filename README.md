@@ -68,6 +68,23 @@ When the active tab is fully complete and submitted, the page sends a timestampe
 
 If you update the Apps Script after deploying, use **Deploy > Manage deployments > Edit** and create a new version. Reuse the same web app URL if Google allows it.
 
+The relay can also archive old logs automatically. It creates archive spreadsheets in a Google Drive folder named `Fulfillment Checklist Archives`, unless you set `ARCHIVE_FOLDER_ID` to an existing Drive folder ID. On the first day of a new month, prior-month rows are moved out of the live Sheet and into monthly archive files such as `Fulfillment Checklist Archive 2026-07`.
+
+To enable automatic monthly archiving:
+
+1. Paste the updated `google-apps-script-slack-relay.js` into Apps Script.
+2. Save.
+3. Run `createMonthlyArchiveTrigger` once from the Apps Script editor.
+4. Approve the requested permissions.
+5. Redeploy the Web App as a new version.
+
+To archive existing older rows immediately, run `archivePriorMonthLogs` once. For example, on July 1, 2026, this archives April, May, and June rows and removes them from the live Sheet.
+
+Friday end-of-day cleaning submissions automatically add two system rows to the `End-of-Day Cleaning` tab:
+
+- Closed Saturday
+- Closed Sunday
+
 The script writes to separate Google Sheet tabs:
 
 - `Morning Product Checklist`
@@ -85,6 +102,22 @@ If either tab does not exist, it creates it and adds these columns:
 - Completion
 - Items
 - Notes
+
+If Apps Script asks for explicit OAuth scopes, use:
+
+```json
+{
+  "timeZone": "America/Phoenix",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/script.scriptapp"
+  ]
+}
+```
 
 ## Customizing Tasks
 
